@@ -1,4 +1,3 @@
-#  from experiments/image_generation.py
 import math
 import time
 
