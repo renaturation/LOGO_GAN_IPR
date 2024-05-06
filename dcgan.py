@@ -1,5 +1,3 @@
-# copy from models
-
 from torch import optim
 from torch.nn.utils import spectral_norm as SN
 import os
@@ -15,7 +13,6 @@ from util import Logger
 
 
 # ---------------------- Generator ---------------------- #
-# copy from networks
 def block_g(n_inp: int, n_out: int):
     r = nn.Sequential(
         nn.ConvTranspose2d(n_inp, n_out, 4, 2, 1, bias=False),
@@ -49,7 +46,6 @@ class ConvGenerator(nn.Module):
 
 
 # ---------------------- Discriminator ---------------------- #
-# copy from networks
 def block_d(n_inp: int, n_out: int):
     r = nn.Sequential(
         SN(nn.Conv2d(n_inp, n_out, 3, 1, 1, bias=True)),
