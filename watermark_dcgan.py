@@ -10,16 +10,16 @@ from torch.nn import functional as F
 from tqdm import tqdm
 
 from dcgan import DCGAN
-from watermark_fg import TransformVar, PasteWatermark
+from logo_fg import TransformVar, PasteLogo
 from inception import InceptionActivations
 from loss import ssim  # 额外的损失
 from util import DisableBatchNormStats, calculate_frechet_distance, calculate_inception_score
 from util import compute_matching_prob  # 计算水印匹配度
 
 
-class WatermarkDCGAN(DCGAN):
+class LogoDCGAN(DCGAN):
     def __init__(self, bbox=True, ds='CIFAR10', wm_img='A', num_wm=1):
-        super(WatermarkDCGAN, self).__init__(ds)
+        super(LogoDCGAN, self).__init__(ds)
 
         self.bbox = bbox
 
@@ -28,11 +28,11 @@ class WatermarkDCGAN(DCGAN):
             self.exp_name = 'DCGAN-%s-%s-%d' % (self.ds.upper(), wm_img, num_wm)
             self.Lambda = 1.0
 
-            self.wm_file = './data/watermarks/%s.png' % wm_img
+            self.wm_file = './data/logos/%s.png' % wm_img
             self.wm_size = self.image_size // 2
 
             self.fn_inp = TransformVar(device=self.device, wm_img=wm_img, num1=num_wm, z_dim=self.z_dim).to(self.device)
-            self.fn_out = PasteWatermark(watermark_size=self.wm_size, watermark_file=self.wm_file).to(self.device)
+            self.fn_out = PasteLogo(logo_size=self.wm_size, logo_file=self.wm_file).to(self.device)
 
             self.xwm, self.ywm, self.Gxwm = None, None, None
 
@@ -46,10 +46,10 @@ class WatermarkDCGAN(DCGAN):
 
             print('*** BLACK-BOX ***')
             # self.fn_inp = TransformVar(device=self.device, num1=f_num1, z_dim=self.z_dim).to(self.device)
-            # self.fn_out = PasteWatermark(watermark_file=self.bbox_config['watermark_file']).to(self.device)
+            # self.fn_out = PasteLogo(logo_file=self.bbox_config['logo_file']).to(self.device)
 
             print('Input f(x): TransformVar')
-            print('Output g(x): PasteWatermark')
+            print('Output g(x): PasteLogo')
             print('lambda: %.4f' % self.Lambda)
             print('Loss: ssim')
             print('Experimental Name: %s' % self.exp_name)
@@ -130,7 +130,7 @@ class WatermarkDCGAN(DCGAN):
         def post_proc(xx):
             return (xx.clamp_(-1, 1) + 1.) / 2.
 
-        # apply_mask = self.fn_out.__class__(watermark_size=self.image_size//2, opaque=True, normalized=True).apply_mask
+        # apply_mask = self.fn_out.__class__(logo_size=self.image_size//2, opaque=True, normalized=True).apply_mask
         apply_mask = self.fn_out.apply_mask
 
         torch.manual_seed(self.seed)
